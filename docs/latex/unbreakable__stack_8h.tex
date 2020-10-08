@@ -1,0 +1,153 @@
+\hypertarget{unbreakable__stack_8h}{}\doxysection{src/unbreakable\+\_\+stack.h File Reference}
+\label{unbreakable__stack_8h}\index{src/unbreakable\_stack.h@{src/unbreakable\_stack.h}}
+
+
+Implementation of unbreakable stack, with c-\/style templates.  
+
+
+{\ttfamily \#include $<$utility$>$}\newline
+{\ttfamily \#include $<$cstring$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{unbreakable__stack_8h_a7e6cf9b8ef936e39b33fb21e3ead9759}{validate\+Stack}}()
+\item 
+\mbox{\Hypertarget{unbreakable__stack_8h_ae82af0c674ec3e74d519d8472b135bb9}\label{unbreakable__stack_8h_ae82af0c674ec3e74d519d8472b135bb9}} 
+\#define {\bfseries S\+T\+A\+C\+K\+\_\+\+E\+L\+\_\+\+T\+Y\+PE}~int
+\item 
+\mbox{\Hypertarget{unbreakable__stack_8h_a1aeb0f96eeaec8fcce5e8460981fc5ff}\label{unbreakable__stack_8h_a1aeb0f96eeaec8fcce5e8460981fc5ff}} 
+\#define {\bfseries C\+O\+N\+C\+AT}(param1,  param2)~param1\#\#\+\_\+\#\#param2
+\item 
+\mbox{\Hypertarget{unbreakable__stack_8h_af429e81c56b7625a8148423bf96333b7}\label{unbreakable__stack_8h_af429e81c56b7625a8148423bf96333b7}} 
+\#define {\bfseries Stack\+Name}(type)~C\+O\+N\+C\+AT(unbr\+\_\+stack, type)
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949f}{unbr\+\_\+stack\+\_\+state}} \{ \newline
+\mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa2bc49ec37d6a5715dd23e85f1ff5bb59}{OK}}, 
+\mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fadb8b16b7866a0eee3872f249bc06c5ac}{W\+R\+O\+N\+G\+\_\+\+S\+I\+ZE}}, 
+\mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa20f3a9cf289adbed878d0a361ea864dd}{W\+R\+O\+N\+G\+\_\+\+C\+A\+P\+A\+C\+I\+TY}}, 
+\mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa3b96dbb782fb4b87e1998ec5220f5882}{C\+A\+P\+A\+C\+I\+T\+Y\+\_\+\+L\+E\+S\+S\+\_\+\+T\+H\+A\+N\+\_\+\+S\+I\+ZE}}, 
+\newline
+\mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa0971d4a4ac4a421f3faf7af640352b00}{S\+T\+A\+C\+K\+\_\+\+E\+M\+P\+TY}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{unbreakable__stack_8h_a7d907d121af526fe182d49a5c5ccff4d}{Stack\+Name}} (S\+T\+A\+C\+K\+\_\+\+E\+L\+\_\+\+T\+Y\+PE)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Implementation of unbreakable stack, with c-\/style templates. 
+
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{unbreakable__stack_8h_a7e6cf9b8ef936e39b33fb21e3ead9759}\label{unbreakable__stack_8h_a7e6cf9b8ef936e39b33fb21e3ead9759}} 
+\index{unbreakable\_stack.h@{unbreakable\_stack.h}!validateStack@{validateStack}}
+\index{validateStack@{validateStack}!unbreakable\_stack.h@{unbreakable\_stack.h}}
+\doxysubsubsection{\texorpdfstring{validateStack}{validateStack}}
+{\footnotesize\ttfamily \#define validate\+Stack(\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    \{                    \(\backslash\)}
+\DoxyCodeLine{    unbr\_stack\_state valid = getStackState(); \(\backslash\)}
+\DoxyCodeLine{    if (valid != \mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa2bc49ec37d6a5715dd23e85f1ff5bb59}{OK}}) \{                        \(\backslash\)}
+\DoxyCodeLine{        dump();                               \(\backslash\)}
+\DoxyCodeLine{        return valid;                         \(\backslash\)}
+\DoxyCodeLine{    \}                                         \(\backslash\)}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+Checks the stack state and dumps if stack is not ok 
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949f}\label{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949f}} 
+\index{unbreakable\_stack.h@{unbreakable\_stack.h}!unbr\_stack\_state@{unbr\_stack\_state}}
+\index{unbr\_stack\_state@{unbr\_stack\_state}!unbreakable\_stack.h@{unbreakable\_stack.h}}
+\doxysubsubsection{\texorpdfstring{unbr\_stack\_state}{unbr\_stack\_state}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949f}{unbr\+\_\+stack\+\_\+state}}}
+
+Enum that represents stack state \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{OK@{OK}!unbreakable\_stack.h@{unbreakable\_stack.h}}\index{unbreakable\_stack.h@{unbreakable\_stack.h}!OK@{OK}}}\mbox{\Hypertarget{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa2bc49ec37d6a5715dd23e85f1ff5bb59}\label{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa2bc49ec37d6a5715dd23e85f1ff5bb59}} 
+OK&Everything ok \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{WRONG\_SIZE@{WRONG\_SIZE}!unbreakable\_stack.h@{unbreakable\_stack.h}}\index{unbreakable\_stack.h@{unbreakable\_stack.h}!WRONG\_SIZE@{WRONG\_SIZE}}}\mbox{\Hypertarget{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fadb8b16b7866a0eee3872f249bc06c5ac}\label{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fadb8b16b7866a0eee3872f249bc06c5ac}} 
+W\+R\+O\+N\+G\+\_\+\+S\+I\+ZE&Size is less than zero \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{WRONG\_CAPACITY@{WRONG\_CAPACITY}!unbreakable\_stack.h@{unbreakable\_stack.h}}\index{unbreakable\_stack.h@{unbreakable\_stack.h}!WRONG\_CAPACITY@{WRONG\_CAPACITY}}}\mbox{\Hypertarget{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa20f3a9cf289adbed878d0a361ea864dd}\label{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa20f3a9cf289adbed878d0a361ea864dd}} 
+W\+R\+O\+N\+G\+\_\+\+C\+A\+P\+A\+C\+I\+TY&Capacity is less than zero \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{CAPACITY\_LESS\_THAN\_SIZE@{CAPACITY\_LESS\_THAN\_SIZE}!unbreakable\_stack.h@{unbreakable\_stack.h}}\index{unbreakable\_stack.h@{unbreakable\_stack.h}!CAPACITY\_LESS\_THAN\_SIZE@{CAPACITY\_LESS\_THAN\_SIZE}}}\mbox{\Hypertarget{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa3b96dbb782fb4b87e1998ec5220f5882}\label{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa3b96dbb782fb4b87e1998ec5220f5882}} 
+C\+A\+P\+A\+C\+I\+T\+Y\+\_\+\+L\+E\+S\+S\+\_\+\+T\+H\+A\+N\+\_\+\+S\+I\+ZE&Capacity is less than stack actual size \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STACK\_EMPTY@{STACK\_EMPTY}!unbreakable\_stack.h@{unbreakable\_stack.h}}\index{unbreakable\_stack.h@{unbreakable\_stack.h}!STACK\_EMPTY@{STACK\_EMPTY}}}\mbox{\Hypertarget{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa0971d4a4ac4a421f3faf7af640352b00}\label{unbreakable__stack_8h_a955a7eea4ec03eda23ab2e132d32949fa0971d4a4ac4a421f3faf7af640352b00}} 
+S\+T\+A\+C\+K\+\_\+\+E\+M\+P\+TY&Returned by top/pop if stack size is zero \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{unbreakable__stack_8h_a7d907d121af526fe182d49a5c5ccff4d}\label{unbreakable__stack_8h_a7d907d121af526fe182d49a5c5ccff4d}} 
+\index{unbreakable\_stack.h@{unbreakable\_stack.h}!StackName@{StackName}}
+\index{StackName@{StackName}!unbreakable\_stack.h@{unbreakable\_stack.h}}
+\doxysubsubsection{\texorpdfstring{StackName()}{StackName()}}
+{\footnotesize\ttfamily struct Stack\+Name (\begin{DoxyParamCaption}\item[{S\+T\+A\+C\+K\+\_\+\+E\+L\+\_\+\+T\+Y\+PE}]{ }\end{DoxyParamCaption})}
+
+Implementation of unbreakable stack, with c-\/style templates Pushes given element to the stack
+
+
+\begin{DoxyParams}{Parameters}
+{\em elem} & Element to push \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Stack state
+\end{DoxyReturn}
+Pops top element from the stack
+
+
+\begin{DoxyParams}{Parameters}
+{\em elem} & Element reference to pop into \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Stack state
+\end{DoxyReturn}
+Returns the top element of the stack without popping it
+
+
+\begin{DoxyParams}{Parameters}
+{\em elem} & Element reference to write top element into \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Stack state
+\end{DoxyReturn}
+Returns whether this stack should be treated as empty
+
+\begin{DoxyReturn}{Returns}
+True if stack is empty, false otherwise
+\end{DoxyReturn}
+Returns size of the stack
+
+\begin{DoxyReturn}{Returns}
+Size of the stack
+\end{DoxyReturn}
+Dumps all stack info to the file
+
+
+\begin{DoxyParams}{Parameters}
+{\em path} & Path to the dump file\\
+\hline
+\end{DoxyParams}
+Dumps all stack info to default file (unbr\+\_\+stack\+\_\+$<$type$>$.\+txt)

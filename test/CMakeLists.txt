@@ -3,7 +3,7 @@ project(ISP_DZ3)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(tests main.cpp)
+add_executable(tests main.cpp ../src/unbreakable_stack.h)
 
 target_compile_options(tests PRIVATE -Wall -Wextra)
 

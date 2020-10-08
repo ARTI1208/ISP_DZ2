@@ -9,6 +9,8 @@
 
 #include <utility>
 #include <cstring>
+#include <cstdio>
+#include <typeinfo>
 
 /**
  * Enum that represents stack state
@@ -56,6 +58,8 @@ static const char* enumStateName(const unbr_stack_state& state) {
         case STACK_EMPTY:
             return "STACK_EMPTY";
     }
+
+    return "UNKNOWN";
 }
 
 /**

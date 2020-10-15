@@ -56,9 +56,7 @@ enum unbr_stack_state {
      */
     DATA_ATTACK_RIGHT,
 
-    STACK_HASH_CHANGED,
-
-    DATA_HASH_CHANGED,
+    HASH_CHANGED,
 
     /**
      * Returned by top/pop if stack size is zero
@@ -91,10 +89,8 @@ static const char* enumStateName(const unbr_stack_state& state) {
             return "DATA_ATTACK_LEFT";
         case DATA_ATTACK_RIGHT:
             return "DATA_ATTACK_RIGHT";
-        case STACK_HASH_CHANGED:
-            return "STACK_HASH_CHANGED";
-        case DATA_HASH_CHANGED:
-            return "DATA_HASH_CHANGED";
+        case HASH_CHANGED:
+            return "HASH_CHANGED";
     }
 
     return "UNKNOWN";
@@ -132,7 +128,7 @@ static const char* enumStateName(const unbr_stack_state& state) {
 struct StackName(STACK_EL_TYPE) {
 private:
 
-    long leftCanaryGuard[STACK_CANARY_LEN];
+    long leftCanaryGuard[STACK_CANARY_LEN]{};
 
 
     STACK_EL_TYPE* data = nullptr;
@@ -140,27 +136,32 @@ private:
     long sizeInternal = 0;
     long capacity = 0;
 
+#ifdef USE_HASH_CHECK
     std::size_t hash = 0;
+#endif
 
     char* name;
 
-    long rightCanaryGuard[STACK_CANARY_LEN];
+    long rightCanaryGuard[STACK_CANARY_LEN]{};
 
     [[nodiscard]] unbr_stack_state getStackState() const {
         if (sizeInternal < 0) return WRONG_SIZE;
         if (capacity < 0) return WRONG_CAPACITY;
         if (capacity < sizeInternal) return CAPACITY_LESS_THAN_SIZE;
+#ifdef USE_HASH_CHECK
+        if (hash != computeHash()) return HASH_CHANGED;
+#endif
 
         for (int i = 0; i < STACK_CANARY_LEN; ++i) {
             if (leftCanaryGuard[i] != 0xDEADBEEF) return ATTACK_LEFT;
             if (rightCanaryGuard[i] != 0xDEADBEEF) return ATTACK_RIGHT;
 
             if (data != nullptr) {
-                for (int j = i * sizeof(STACK_EL_TYPE), until = (i + 1) * sizeof(STACK_EL_TYPE); j < until; ++j) {
+                for (size_t j = i * sizeof(STACK_EL_TYPE), until = (i + 1) * sizeof(STACK_EL_TYPE); j < until; ++j) {
                     if (((char*) data)[j] != (char) 0xA6) return DATA_ATTACK_LEFT;
                 }
 
-                for (int j = (capacity - 1 - i) * sizeof(STACK_EL_TYPE), until = (capacity - 2 - i) * sizeof(STACK_EL_TYPE); j > until; --j) {
+                for (size_t j = (capacity - 1 - i) * sizeof(STACK_EL_TYPE), until = (capacity - 2 - i) * sizeof(STACK_EL_TYPE); j > until; --j) {
                     if (((char*) data)[j] != (char) 0xA6) return DATA_ATTACK_RIGHT;
                 }
             }
@@ -175,11 +176,11 @@ private:
             auto* newData = new STACK_EL_TYPE[capacity];
 
             for (long i = 0; i < STACK_CANARY_LEN; ++i) {
-                for (int j = i * sizeof(STACK_EL_TYPE), until = (i + 1) * sizeof(STACK_EL_TYPE); j < until; ++j) {
+                for (size_t j = i * sizeof(STACK_EL_TYPE), until = (i + 1) * sizeof(STACK_EL_TYPE); j < until; ++j) {
                     ((char*) newData)[j] = (char) 0xA6;
                 }
 
-                for (int j = (capacity - 1 - i) * sizeof(STACK_EL_TYPE), until = (capacity - 2 - i) * sizeof(STACK_EL_TYPE); j > until; --j) {
+                for (size_t j = (capacity - 1 - i) * sizeof(STACK_EL_TYPE), until = (capacity - 2 - i) * sizeof(STACK_EL_TYPE); j > until; --j) {
                     ((char*) newData)[j] = (char) 0xA6;
                 }
             }
@@ -195,6 +196,15 @@ private:
         }
 
         return false;
+    }
+
+    [[nodiscard]] size_t computeHash() const {
+        size_t newHash = 0;
+
+        newHash = capacity + (newHash << 6u) + (newHash << 16u) - newHash;
+        newHash = sizeInternal + (newHash << 6u) + (newHash << 16u) - newHash;
+
+        return newHash;
     }
 
 public:
@@ -229,6 +239,10 @@ public:
         resizeIfNeeded();
         data[STACK_CANARY_LEN + sizeInternal++] = elem;
 
+#ifdef USE_HASH_CHECK
+        hash = computeHash();
+#endif
+
         validateStack()
         return OK;
     }
@@ -245,6 +259,10 @@ public:
 
         elem = data[--sizeInternal + STACK_CANARY_LEN];
 
+#ifdef USE_HASH_CHECK
+        hash = computeHash();
+#endif
+
         validateStack()
         return OK;
     }
@@ -260,6 +278,10 @@ public:
         if (empty()) return STACK_EMPTY;
 
         elem = data[sizeInternal - 1 + STACK_CANARY_LEN];
+
+#ifdef USE_HASH_CHECK
+        hash = computeHash();
+#endif
 
         validateStack()
         return OK;

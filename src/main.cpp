@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <iostream>
 
 using namespace std;
@@ -31,17 +30,17 @@ int main(int argc, char* argv[]) {
 
     std::cout << "1=================\n";
 
-    double* str1 = new double[3]{1, 2, 3};
+//    double* str1 = new double[3]{1, 2, 3};
 
     std::cout << doubleStack.push(6) << "\n";
 
-    const char* str2 = "man";
-    doubleStack.dump();
+//    const char* str2 = "man";
+//    doubleStack.dump();
 
 
-    for (int i = 0; i < 3; ++i) {
-        str1[i] = 9;
-    }
+//    for (int i = 0; i < 3; ++i) {
+//        str1[i] = 9;
+//    }
 
     std::cout << "2=================\n";
 
@@ -71,17 +70,6 @@ int main(int argc, char* argv[]) {
     std::cout << doubleStack.size() << "\n";
 
     std::cout << "7=================\n";
-
-
-    unbr_stack_string s {};
-
-    s.push("test");
-
-    s.dump();
-
-    string str;
-    std::cout << s.pop(str) << "\n";
-    std::cout << str << "\n";
 
 
 

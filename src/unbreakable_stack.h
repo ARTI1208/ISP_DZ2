@@ -37,10 +37,36 @@ enum unbr_stack_state {
     CAPACITY_LESS_THAN_SIZE,
 
     /**
+     * Left canary guard is broken
+     */
+    ATTACK_LEFT,
+
+    /**
+     * Right canary guard is broken
+     */
+    ATTACK_RIGHT,
+
+    /**
+     * Left canary data guard is broken
+     */
+    DATA_ATTACK_LEFT,
+
+    /**
+     * Right canary data guard is broken
+     */
+    DATA_ATTACK_RIGHT,
+
+    STACK_HASH_CHANGED,
+
+    DATA_HASH_CHANGED,
+
+    /**
      * Returned by top/pop if stack size is zero
      */
     STACK_EMPTY
 };
+
+const int resizeFactor = 2;
 
 /**
  * Return enum stack state name
@@ -57,6 +83,18 @@ static const char* enumStateName(const unbr_stack_state& state) {
             return "CAPACITY_LESS_THAN_SIZE";
         case STACK_EMPTY:
             return "STACK_EMPTY";
+        case ATTACK_LEFT:
+            return "ATTACK_LEFT";
+        case ATTACK_RIGHT:
+            return "ATTACK_RIGHT";
+        case DATA_ATTACK_LEFT:
+            return "DATA_ATTACK_LEFT";
+        case DATA_ATTACK_RIGHT:
+            return "DATA_ATTACK_RIGHT";
+        case STACK_HASH_CHANGED:
+            return "STACK_HASH_CHANGED";
+        case DATA_HASH_CHANGED:
+            return "DATA_HASH_CHANGED";
     }
 
     return "UNKNOWN";
@@ -73,10 +111,16 @@ static const char* enumStateName(const unbr_stack_state& state) {
     }                                         \
 }
 
+#define VAR_NAME(var) #var
+
 #endif
 
 #ifndef STACK_EL_TYPE
 #define STACK_EL_TYPE int
+#endif
+
+#ifndef STACK_CANARY_LEN
+#define STACK_CANARY_LEN 1
 #endif
 
 #define CONCAT(param1, param2) param1##_##param2
@@ -87,28 +131,63 @@ static const char* enumStateName(const unbr_stack_state& state) {
  */
 struct StackName(STACK_EL_TYPE) {
 private:
+
+    long leftCanaryGuard[STACK_CANARY_LEN];
+
+
     STACK_EL_TYPE* data = nullptr;
 
     long sizeInternal = 0;
     long capacity = 0;
 
-    int resizeFactor = 2;
+    std::size_t hash = 0;
+
+    char* name;
+
+    long rightCanaryGuard[STACK_CANARY_LEN];
 
     [[nodiscard]] unbr_stack_state getStackState() const {
         if (sizeInternal < 0) return WRONG_SIZE;
         if (capacity < 0) return WRONG_CAPACITY;
         if (capacity < sizeInternal) return CAPACITY_LESS_THAN_SIZE;
 
+        for (int i = 0; i < STACK_CANARY_LEN; ++i) {
+            if (leftCanaryGuard[i] != 0xDEADBEEF) return ATTACK_LEFT;
+            if (rightCanaryGuard[i] != 0xDEADBEEF) return ATTACK_RIGHT;
+
+            if (data != nullptr) {
+                for (int j = i * sizeof(STACK_EL_TYPE), until = (i + 1) * sizeof(STACK_EL_TYPE); j < until; ++j) {
+                    if (((char*) data)[j] != (char) 0xA6) return DATA_ATTACK_LEFT;
+                }
+
+                for (int j = (capacity - 1 - i) * sizeof(STACK_EL_TYPE), until = (capacity - 2 - i) * sizeof(STACK_EL_TYPE); j > until; --j) {
+                    if (((char*) data)[j] != (char) 0xA6) return DATA_ATTACK_RIGHT;
+                }
+            }
+        }
+
         return OK;
     }
 
     bool resizeIfNeeded() {
-        if (sizeInternal == capacity) {
-            capacity = capacity > 0 ? resizeFactor * capacity : 10;
+        if (sizeInternal >= capacity - 2 * STACK_CANARY_LEN) {
+            capacity = capacity > 0 ? resizeFactor * capacity : 10 + 2 * STACK_CANARY_LEN;
             auto* newData = new STACK_EL_TYPE[capacity];
-            for (long i = 0; i < sizeInternal; ++i) {
+
+            for (long i = 0; i < STACK_CANARY_LEN; ++i) {
+                for (int j = i * sizeof(STACK_EL_TYPE), until = (i + 1) * sizeof(STACK_EL_TYPE); j < until; ++j) {
+                    ((char*) newData)[j] = (char) 0xA6;
+                }
+
+                for (int j = (capacity - 1 - i) * sizeof(STACK_EL_TYPE), until = (capacity - 2 - i) * sizeof(STACK_EL_TYPE); j > until; --j) {
+                    ((char*) newData)[j] = (char) 0xA6;
+                }
+            }
+
+            for (long i = STACK_CANARY_LEN, until = sizeInternal + STACK_CANARY_LEN; i < until; ++i) {
                 newData[i] = data[i];
             }
+
             delete[] data;
             data = newData;
 
@@ -120,8 +199,20 @@ private:
 
 public:
 
+    explicit StackName(STACK_EL_TYPE)(const char* varName = "unnamed_stack") {
+        for (int i = 0; i < STACK_CANARY_LEN; ++i) {
+            leftCanaryGuard[i] = 0xDEADBEEF;
+            rightCanaryGuard[i] = 0xDEADBEEF;
+        }
+        name = new char[80];
+        strncpy(name, varName, 79);
+        name[79] = '\0';
+    }
+
     ~StackName(STACK_EL_TYPE)() {
         delete[] data;
+        delete[] name;
+
         capacity = -1;
         sizeInternal = 0;
     }
@@ -136,7 +227,7 @@ public:
         validateStack()
 
         resizeIfNeeded();
-        data[sizeInternal++] = elem;
+        data[STACK_CANARY_LEN + sizeInternal++] = elem;
 
         validateStack()
         return OK;
@@ -152,7 +243,7 @@ public:
         validateStack()
         if (empty()) return STACK_EMPTY;
 
-        elem = data[--sizeInternal];
+        elem = data[--sizeInternal + STACK_CANARY_LEN];
 
         validateStack()
         return OK;
@@ -168,7 +259,7 @@ public:
         validateStack()
         if (empty()) return STACK_EMPTY;
 
-        elem = data[sizeInternal - 1];
+        elem = data[sizeInternal - 1 + STACK_CANARY_LEN];
 
         validateStack()
         return OK;
@@ -203,16 +294,16 @@ public:
 
         unbr_stack_state state = getStackState();
         const char* stateStr = enumStateName(state);
-        fprintf(logFile, "%s %s (%s) [%p] {\n\tcapacity: %ld,\n\tsize: %ld,\n\tdata [%p]: {\n",
-                typeid(this).name(), "test", stateStr, this, capacity, sizeInternal, data);
+        fprintf(logFile, "%s '%s' (%s) [%p] {\n\tcapacity: %ld,\n\tsize: %ld,\n\tdata [%p]: {\n",
+                typeid(this).name(), name, stateStr, this, capacity, sizeInternal, data);
 
 #ifdef STACK_EL_TO_STRING
         if (state == OK) {
-            for (long i = 0; i < capacity; ++i) {
+            for (long i = 0; i < capacity - 2 * STACK_CANARY_LEN; ++i) {
                 if (i < sizeInternal) {
-                    fprintf(logFile, "\t\t*data[%ld]: %s\n", i, STACK_EL_TO_STRING(data[i]));
+                    fprintf(logFile, "\t\t*data[%ld]: %s\n", i, STACK_EL_TO_STRING(data[i + STACK_CANARY_LEN]));
                 } else {
-                    fprintf(logFile, "\t\t data[%ld]: %s (POISON)\n", i, STACK_EL_TO_STRING(data[i]));
+                    fprintf(logFile, "\t\t data[%ld]: (POISON)\n", i);
                 }
             }
         }

@@ -1,5 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cert-err58-cpp"
 //
 // Created by arti1208 on 02.10.2020.
 //
@@ -14,15 +12,15 @@ using namespace std;
 #undef STACK_EL_TYPE
 #undef STACK_EL_TO_STRING
 
-#define STACK_EL_TYPE string
-#define STACK_EL_TO_STRING(v) v.c_str()
+#define STACK_EL_TYPE long
+#define STACK_EL_TO_STRING(v) std::to_string(v).c_str()
 #include "../src/unbreakable_stack.h"
 #undef STACK_EL_TYPE
 #undef STACK_EL_TO_STRING
 
 TEST(StackTest, DoesItCompileAtAll) {
     unbr_stack_double doubleStack {};
-    unbr_stack_string stringStack {};
+    unbr_stack_long stringStack {};
 }
 
 TEST(StackTest, StackPush) {
@@ -75,15 +73,15 @@ TEST(StackTest, StackPop) {
 
 TEST(StackTest, TryBreakStack) {
     unbr_stack_double doubleStack{};
-
-    auto* q = new double[3] {1, 2, 3};
-
+//
+//    auto* q = new double[3] {1, 2, 3};
+//
     doubleStack.push(5);
-
-    for (int i = 0; i < 10; ++i) {
-        q[i] = 40;
-    }
-
+//
+//    for (int i = 0; i < 10; ++i) {
+//        q[i] = 40;
+//    }
+//
     double tmp = 0;
 
     ASSERT_EQ(doubleStack.top(tmp), OK);
@@ -91,4 +89,48 @@ TEST(StackTest, TryBreakStack) {
     ASSERT_EQ(tmp, 5);
 }
 
-#pragma clang diagnostic pop // yeah, CLion bug
+TEST(StackTest, StructCanaryLeftAttack) {
+    struct s {
+        long t[2]{7, 8};
+        unbr_stack_long longStack {};
+    } tmpStruct;
+
+    ASSERT_EQ(tmpStruct.longStack.push(6), OK);
+
+    for (int i = 0; i < 3; ++i) {
+        tmpStruct.t[i] = 9;
+    }
+
+    ASSERT_EQ(tmpStruct.longStack.push(6), ATTACK_LEFT);
+}
+
+TEST(StackTest, StructCanaryRightAttack) {
+    struct s {
+        unbr_stack_long longStack {};
+        long t[2]{7, 8};
+    } tmpStruct;
+
+    ASSERT_EQ(tmpStruct.longStack.push(6), OK);
+
+    for (int i = 1; i >= -1; --i) {
+        tmpStruct.t[i] = 9;
+    }
+
+    ASSERT_EQ(tmpStruct.longStack.push(6), ATTACK_RIGHT);
+}
+
+TEST(StackTest, DataCanaryLeftAttack) {
+    unbr_stack_long longStack {};
+
+    ASSERT_EQ(longStack.push(6), OK);
+
+    //no idea how to test data for attack
+}
+
+TEST(StackTest, DataCanaryRightAttack) {
+    unbr_stack_long longStack {};
+
+    ASSERT_EQ(longStack.push(6), OK);
+
+    //no idea how to test data for attack
+}
